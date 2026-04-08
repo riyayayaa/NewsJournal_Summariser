@@ -63,47 +63,6 @@ newss/
     └── vite.config.js
 ```
 
-## Prerequisites
-
-- Java 25
-- Node.js 18+
-- Groq API key — [console.groq.com](https://console.groq.com)
-- NewsAPI key — [newsapi.org](https://newsapi.org/register)
-
-## Setup
-
-**1. Configure API keys**
-
-Open `src/main/resources/application.properties` and replace the placeholders:
-
-```properties
-groq.api-key=your_groq_api_key_here
-newsapi.key=your_newsapi_key_here
-```
-
-**2. Run the backend**
-
-```bash
-.\gradlew.bat bootRun
-```
-
-Spring Boot starts on `http://localhost:8080`
-
-**3. Run the frontend**
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-React starts on `http://localhost:5173`
-
-**4. Open the app**
-
-```
-http://localhost:5173
-```
 
 ## API Endpoints
 
