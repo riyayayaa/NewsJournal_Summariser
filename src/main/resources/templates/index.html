@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>News Journal Summariser</title>
+    <link rel="stylesheet" th:href="@{/style.css}"/>
+</head>
+<body>
+<nav class="navbar">
+    <span class="brand">📰 News Journal</span>
+    <div class="nav-links">
+        <a href="/" class="active">Journal</a>
+        <a href="/chat">💬 Chat</a>
+        <a href="/news">🌐 News Feed</a>
+    </div>
+</nav>
+
+<main class="container">
+    <section class="card">
+        <h2>Add Entry</h2>
+        <div class="tab-group">
+            <button class="tab active" onclick="switchTab('text')">✏️ Write Note</button>
+            <button class="tab" onclick="switchTab('url')">🔗 From URL</button>
+        </div>
+
+        <form id="text-form" th:action="@{/entries/text}" method="post">
+            <input type="text" name="title" placeholder="Title" required class="input"/>
+            <textarea name="content" placeholder="Write your note here..." rows="4" class="input" required></textarea>
+            <button type="submit" class="btn btn-primary">Save Entry</button>
+        </form>
+
+        <form id="url-form" th:action="@{/entries/url}" method="post" style="display:none">
+            <input type="url" name="url" placeholder="https://example.com/article" required class="input"/>
+            <button type="submit" class="btn btn-primary">Extract &amp; Save</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>Journal Entries</h2>
+        <div th:if="${#lists.isEmpty(entries)}" class="empty-state">No entries yet. Add one above.</div>
+        <div class="entries-grid">
+            <div th:each="entry : ${entries}" class="entry-card">
+                <div class="entry-header">
+                    <h3 th:text="${entry.title ?: 'Untitled'}">Title</h3>
+                    <div class="badges">
+                        <span th:if="${entry.topic}" class="badge badge-topic" th:text="${entry.topic}"></span>
+                        <span th:if="${entry.sentiment}" th:class="'badge badge-sentiment badge-' + ${#strings.toLowerCase(entry.sentiment)}" th:text="${entry.sentiment}"></span>
+                    </div>
+                </div>
+                <p class="entry-content" th:text="${#strings.abbreviate(entry.content, 200)}">Content</p>
+                <div th:if="${entry.summary}" class="summary-box">
+                    <strong>Summary:</strong>
+                    <p th:text="${entry.summary}"></p>
+                </div>
+                <div class="entry-meta">
+                    <span th:if="${entry.sourceUrl}">
+                        <a th:href="${entry.sourceUrl}" target="_blank">🔗 Source</a>
+                    </span>
+                    <span class="date" th:text="${#temporals.format(entry.createdAt, 'MMM dd, yyyy')}"></span>
+                </div>
+                <div class="entry-actions">
+                    <form th:action="@{/entries/{id}/summarize(id=${entry.id})}" method="post" style="display:inline">
+                        <button class="btn btn-sm btn-ai">🤖 Summarise</button>
+                    </form>
+                    <form th:action="@{/entries/{id}/classify(id=${entry.id})}" method="post" style="display:inline">
+                        <button class="btn btn-sm btn-classify">🏷️ Classify</button>
+                    </form>
+                    <a th:href="@{/entries/{id}/edit(id=${entry.id})}" class="btn btn-sm btn-edit">✏️ Modify</a>
+                    <form th:action="@{/entries/{id}/delete(id=${entry.id})}" method="post" style="display:inline"
+                          onsubmit="return confirm('Delete this entry?')">
+                        <button class="btn btn-sm btn-danger">🗑️</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+function switchTab(tab) {
+    document.getElementById('text-form').style.display = tab === 'text' ? 'flex' : 'none';
+    document.getElementById('url-form').style.display = tab === 'url' ? 'flex' : 'none';
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', (i === 0) === (tab === 'text')));
+}
+</script>
+</body>
+</html>

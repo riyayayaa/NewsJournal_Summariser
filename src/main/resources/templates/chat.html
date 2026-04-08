@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Chat with Journal</title>
+    <link rel="stylesheet" th:href="@{/style.css}" xmlns:th="http://www.thymeleaf.org"/>
+</head>
+<body>
+<nav class="navbar">
+    <span class="brand">📰 News Journal</span>
+    <div class="nav-links">
+        <a href="/">Journal</a>
+        <a href="/chat" class="active">💬 Chat</a>
+        <a href="/news">🌐 News Feed</a>
+    </div>
+</nav>
+<main class="container">
+    <section class="card chat-card">
+        <h2>💬 Chat with Your Journal</h2>
+        <p class="subtitle">Ask questions about your saved news entries. Powered by Ollama RAG.</p>
+
+        <div id="chat-messages" class="chat-messages">
+            <div class="chat-msg assistant">
+                <span>👋 Hi! Ask me anything about your journal entries.</span>
+            </div>
+        </div>
+
+        <div class="chat-input-row">
+            <input type="text" id="chat-input" class="input" placeholder="e.g. What did I save about technology?" onkeydown="if(event.key==='Enter') sendMessage()"/>
+            <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+        </div>
+    </section>
+</main>
+
+<script>
+async function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const question = input.value.trim();
+    if (!question) return;
+
+    appendMessage('user', question);
+    input.value = '';
+    appendMessage('assistant', '⏳ Thinking...');
+
+    try {
+        const res = await fetch('/chat/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ question })
+        });
+        const data = await res.json();
+        removeLastAssistant();
+        appendMessage('assistant', data.answer);
+    } catch (e) {
+        removeLastAssistant();
+        appendMessage('assistant', 'Error: ' + e.message);
+    }
+}
+
+function appendMessage(role, text) {
+    const box = document.getElementById('chat-messages');
+    const div = document.createElement('div');
+    div.className = 'chat-msg ' + role;
+    div.innerHTML = '<span>' + escapeHtml(text) + '</span>';
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
+
+function removeLastAssistant() {
+    const msgs = document.querySelectorAll('.chat-msg.assistant');
+    if (msgs.length) msgs[msgs.length - 1].remove();
+}
+
+function escapeHtml(t) {
+    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>News Feed</title>
+    <link rel="stylesheet" th:href="@{/style.css}"/>
+</head>
+<body>
+<nav class="navbar">
+    <span class="brand">📰 News Journal</span>
+    <div class="nav-links">
+        <a href="/">Journal</a>
+        <a href="/chat">💬 Chat</a>
+        <a href="/news" class="active">🌐 News Feed</a>
+    </div>
+</nav>
+<main class="container">
+    <section class="card">
+        <h2>🌐 Live News Feed</h2>
+
+        <form method="get" action="/news" class="news-search-row">
+            <input type="text" name="q" th:value="${query}" placeholder="Search news..." class="input"/>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+
+        <div class="category-tabs">
+            <a th:each="cat : ${ {'general','business','technology','sports','health','science','entertainment'} }"
+               th:href="@{/news(category=${cat})}"
+               th:text="${#strings.capitalize(cat)}"
+               th:class="${category == cat} ? 'cat-tab active' : 'cat-tab'"></a>
+        </div>
+
+        <div class="news-grid">
+            <div th:each="article : ${articles}" class="news-card">
+                <h3><a th:href="${article.url}" target="_blank" th:text="${article.title}">Title</a></h3>
+                <p th:text="${article.description}">Description</p>
+                <div class="news-meta">
+                    <span th:text="${article.source}"></span>
+                    <span th:text="${article.publishedAt}"></span>
+                </div>
+                <form th:action="@{/entries/url}" method="post" style="margin-top:.5rem">
+                    <input type="hidden" name="url" th:value="${article.url}"/>
+                    <button class="btn btn-sm btn-ai">➕ Add to Journal</button>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>
