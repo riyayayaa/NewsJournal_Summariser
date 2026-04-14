@@ -28,15 +28,21 @@ export default function News() {
     fetchNews(search)
   }
 
-  async function addToJournal(url) {
-    setAddingUrl(url)
-    await fetch('/api/entries/url', {
+  async function addToJournal(article) {
+    setAddingUrl(article.url)
+    const content = [
+      article.description,
+      `Source: ${article.source}`,
+      `Published: ${article.publishedAt?.slice(0, 10)}`,
+      `URL: ${article.url}`
+    ].filter(Boolean).join('\n\n')
+    await fetch('/api/entries/text', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url })
+      body: JSON.stringify({ title: article.title, content })
     })
     setAddingUrl(null)
-    setAdded(s => new Set([...s, url]))
+    setAdded(s => new Set([...s, article.url]))
   }
 
   return (
@@ -137,7 +143,7 @@ export default function News() {
                       <ExternalLink size={12} /> Read
                     </a>
                     <button className={`btn btn-sm ${added.has(a.url) ? 'btn-classify' : 'btn-ai'}`}
-                      onClick={() => addToJournal(a.url)}
+                      onClick={() => addToJournal(a)}
                       disabled={addingUrl === a.url || added.has(a.url)}
                       style={{ flex: 1, justifyContent: 'center' }}>
                       <Plus size={12} />
